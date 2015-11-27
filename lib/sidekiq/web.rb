@@ -11,7 +11,6 @@ module Sidekiq
   class Web < Sinatra::Base
     include Sidekiq::Paginator
 
-    enable :sessions
     use Rack::Protection, :use => :authenticity_token unless ENV['RACK_ENV'] == 'test'
 
     set :root, File.expand_path(File.dirname(__FILE__) + "/../../web")
@@ -259,19 +258,6 @@ module Sidekiq
       elsif params['add_to_queue']
         job.add_to_queue
       end
-    end
-  end
-end
-
-if defined?(::ActionDispatch::Request::Session) &&
-    !::ActionDispatch::Request::Session.respond_to?(:each)
-  # mperham/sidekiq#2460
-  # Rack apps can't reuse the Rails session store without
-  # this monkeypatch
-  class ActionDispatch::Request::Session
-    def each(&block)
-      hash = self.to_hash
-      hash.each(&block)
     end
   end
 end
